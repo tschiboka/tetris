@@ -1,0 +1,11 @@
+.Tetris {
+    width: 400px;
+    max-width: 100vw;
+    height: 750px;
+    max-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #070707;
+    border: 1px solid #777;
+    border-radius: 5px;
+}

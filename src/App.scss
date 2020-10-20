@@ -1,0 +1,14 @@
+.App {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(27deg, #141414 0px, transparent 10px) 0 6px,
+        linear-gradient(207deg, #141414 0px, transparent 10px) 11px 0,
+        linear-gradient(27deg, #141414 0px, transparent 10px) 0 11px,
+        linear-gradient(207deg, #141414 0px, transparent 10px) 11px 6px,
+        linear-gradient(0deg, #121212 0% 25%, #101010 25% 50%, transparent 50% 75%, #131313 75%, #131313 100%);
+    background-color: rgb(19, 19, 19);
+    background-size: 20px 20px;
+}
