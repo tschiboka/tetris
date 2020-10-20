@@ -1,10 +1,27 @@
 .Block {
     width: 100%;
     height: 100%;
-    background: grey;
     border: 1px solid #101010;
+    border-radius: 4px;
+    & > div {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0% 50%, rgba(0, 0, 0, 0.1) 50%) 0 0 / 100% 100%,
+                    linear-gradient(45deg, rgba(0, 0, 0, 0.2) 0% 50%, rgba(255, 255, 255, 0.3) 50%) 0 0 / 100% 100%;
+        border-radius: 3px;
+    }
 }
 
 .type_0 {
+    transform: rotate(180deg);
+    opacity: 0.05;
     background: transparent;
 }
+
+.type_1 { background-color: deeppink; }
+.type_2 { background-color: aqua; }
+.type_3 { background-color: rgb(255, 157, 0); }
+.type_4 { background-color: yellow; }
+.type_5 { background-color: mediumorchid; }
+.type_6 { background-color: springgreen; }
+.type_7 { background-color: azure; }

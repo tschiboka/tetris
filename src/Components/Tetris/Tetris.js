@@ -17,11 +17,14 @@ export default class Tetris extends Component {
 
 
     render() {
+        const grid = [...this.state.grid]
+        grid[2] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4];
+        console.log(this.state.grid);
         return (
             <div className="Tetris">
                 <TetrisHeader />
 
-                <GameArea grid={this.state.grid} />
+                <GameArea grid={grid} />
 
                 <GameControl />
             </div>

@@ -5,6 +5,8 @@
     flex-direction: column;
     justify-content: space-evenly;
     color: white;
+    border-top: 1px solid #777;
+    border-bottom: 1px solid #777;
     & > div {
         width: 100%;
         height: calc(100% / 15);
