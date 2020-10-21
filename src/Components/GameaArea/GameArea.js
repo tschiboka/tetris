@@ -12,8 +12,8 @@ export default class GameArea extends Component {
 
         this.state = {
             grid: Array(ROW_NUM).fill().map(row => Array(COL_NUM).fill(0)),
-            currentShape: "T" || this.getRandomShape(),
-            currentRow: 1,
+            currentShape: this.getRandomShape(),
+            currentRow: 0,
             currentColumn: 8,
             currentDirection: 0,
             nextShape: this.getRandomShape(),
@@ -22,36 +22,17 @@ export default class GameArea extends Component {
             activeKey: undefined,
             allowKey: true,
             step: 0,
+            time: 0,
         }
     }
 
 
 
-    getRandomShape() {
-        const SHAPES = "IOSZLJT";
-        return SHAPES[Math.ceil(Math.random() * 7)];
+    componentDidMount() {
+        document.addEventListener("keydown", event => this.handleKeyDown(event.key));
+
+        this.startTimer();
     }
-
-
-
-    renderGrid() {
-        const { currentRow, currentColumn, currentShape, currentDirection } = { ...this.state };
-        const coords = this.getShapeCoordinates(currentRow, currentColumn, currentShape, currentDirection);
-        const grid = this.state.grid.map(row => [...row]);
-
-        coords.map(coord => grid[coord[0]][coord[1]] = this.state.currentShape);
-
-        return grid.map((row, ri) => (
-            <div key={`row_${ri}`}>
-                {row.map((block, bi) => (
-                    <div key={`block_${ri}_${bi}`}>{<Block type={block} />}</div>
-                ))}
-            </div>));
-    }
-
-
-
-    componentDidMount() { document.addEventListener("keydown", event => this.handleKeyDown(event.key)); }
 
 
 
@@ -81,6 +62,56 @@ export default class GameArea extends Component {
         }
     }
 
+
+
+    startTimer() {
+        let time = 0;
+        console.log(time);
+        const timer = setInterval(() => {
+            time += 10;
+
+            if (time % 1000 === 0) console.log(time / 1000);
+
+            if (time % this.props.speedInMs === 0) this.drop();
+
+            if (!this.props.gameOn) clearInterval(timer);
+        }, 10);
+    }
+
+
+
+
+    drop() {
+        const { currentRow, currentColumn, currentShape, currentDirection } = { ...this.state };
+        const isValidMove = this.isValidMove(currentRow + 1, currentColumn, currentShape, currentDirection);
+
+        if (isValidMove) this.setState({ ...this.state, currentRow: this.state.currentRow + 1 });
+        else {
+            // UPDATE GRID
+            const updatedGrid = [...this.state.grid.map(row => [...row])];
+            const coords = this.getShapeCoordinates(currentRow, currentColumn, currentShape, currentDirection);
+
+
+            coords.map(coord => updatedGrid[coord[0]][coord[1]] = this.state.currentShape);
+            this.setState({
+                ...this.state,
+                grid: updatedGrid,
+                currentShape: this.state.nextShape,
+                currentRow: 0,
+                currentColumn: 8,
+                currentDirection: 0,
+                nextShape: this.getRandomShape()
+            });
+        }
+    }
+
+
+
+
+    getRandomShape() {
+        const SHAPES = "IOSZLJT";
+        return SHAPES[Math.floor(Math.random() * 7)];
+    }
 
 
 
@@ -159,6 +190,23 @@ export default class GameArea extends Component {
         });
 
         return valid.every(el => !!el);
+    }
+
+
+
+    renderGrid() {
+        const { currentRow, currentColumn, currentShape, currentDirection } = { ...this.state };
+        const coords = this.getShapeCoordinates(currentRow, currentColumn, currentShape, currentDirection);
+        const grid = this.state.grid.map(row => [...row]);
+
+        coords.map(coord => grid[coord[0]][coord[1]] = this.state.currentShape);
+
+        return grid.map((row, ri) => (
+            <div key={`row_${ri}`}>
+                {row.map((block, bi) => (
+                    <div key={`block_${ri}_${bi}`}>{<Block type={block} />}</div>
+                ))}
+            </div>));
     }
 
 

@@ -12,7 +12,10 @@ export default class Tetris extends Component {
 
         this.state = {
             points: 0,
-            time: 0,
+            gameOn: true,
+            speedInMs: 200,
+            speed: 1,
+            shapesLanded: 0,
         }
     }
 
@@ -23,7 +26,12 @@ export default class Tetris extends Component {
             <div className="Tetris">
                 <TetrisHeader />
 
-                <GameArea />
+                <GameArea
+                    dropCount={this.state.dropCount}
+                    speed={this.state.speed}
+                    speedInMs={this.state.speedInMs}
+                    gameOn={this.state.gameOn}
+                />
 
                 <GameControl />
             </div>
