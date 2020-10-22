@@ -23,6 +23,7 @@ export default class GameArea extends Component {
             allowKey: true,
             step: 0,
             time: 0,
+            droppingShape: false,
         }
     }
 
@@ -30,6 +31,8 @@ export default class GameArea extends Component {
 
     componentDidMount() {
         document.addEventListener("keydown", event => this.handleKeyDown(event.key));
+
+        this.props.setTetrisState("nextShape", this.state.nextShape);
 
         this.startTimer();
     }
@@ -57,6 +60,10 @@ export default class GameArea extends Component {
                     if (isValidMove) this.setState({ ...this.state, currentDirection: nextDirection });
                     break;
                 }
+                case "ArrowDown": {
+                    this.setState({ ...this.state, droppingShape: true });
+                    break;
+                }
                 default: { }
             }
         }
@@ -66,27 +73,37 @@ export default class GameArea extends Component {
 
     startTimer() {
         let time = 0;
-        console.log(time);
+
         const timer = setInterval(() => {
             time += 10;
 
-            if (time % 1000 === 0) console.log(time / 1000);
+            if (time % 1000 === 0) this.props.setTetrisState("time", time);
 
-            if (time % this.props.speedInMs === 0) this.drop();
+            if (time % this.props.speedInMs === 0) this.dropOne();
 
             if (!this.props.gameOn) clearInterval(timer);
+
+            if (this.state.droppingShape) {
+                this.dropOne();
+                this.props.setTetrisState("points", this.props.points + 1);
+            }
         }, 10);
     }
 
 
 
 
-    drop() {
+    dropOne() {
         const { currentRow, currentColumn, currentShape, currentDirection } = { ...this.state };
         const isValidMove = this.isValidMove(currentRow + 1, currentColumn, currentShape, currentDirection);
 
         if (isValidMove) this.setState({ ...this.state, currentRow: this.state.currentRow + 1 });
+        // REACHED BOTTOM
         else {
+            // SET POINTS AND SPEED
+            this.props.setTetrisState("nextShape", this.state.nextShape);
+            this.props.setTetrisState("points", this.props.points + 10);
+
             // UPDATE GRID
             const updatedGrid = [...this.state.grid.map(row => [...row])];
             const coords = this.getShapeCoordinates(currentRow, currentColumn, currentShape, currentDirection);
@@ -100,7 +117,14 @@ export default class GameArea extends Component {
                 currentRow: 0,
                 currentColumn: 8,
                 currentDirection: 0,
-                nextShape: this.getRandomShape()
+                nextShape: this.getRandomShape(),
+                droppingShape: false,
+            }, () => {
+                // CHECK IF NEXT SHAPE HAS ENOUGH SPACE
+                const { currentRow, currentColumn, currentShape, currentDirection } = { ...this.state };
+                const isValidMove = this.isValidMove(currentRow + 1, currentColumn, currentShape, currentDirection);
+
+                if (!isValidMove) this.props.setTetrisState("gameOn", false);
             });
         }
     }

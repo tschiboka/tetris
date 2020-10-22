@@ -20,17 +20,31 @@ export default class Tetris extends Component {
     }
 
 
+    setTetrisState(key, value) {
+        const newState = { ...this.state };
+        newState[key] = value;
+        this.setState(newState);
+    }
+
+
 
     render() {
         return (
             <div className="Tetris">
-                <TetrisHeader />
+                <TetrisHeader
+                    time={this.state.time || 0}
+                    points={this.state.points}
+                    speed={this.state.speed}
+                    nextShape={this.state.nextShape}
+                />
 
                 <GameArea
                     dropCount={this.state.dropCount}
                     speed={this.state.speed}
                     speedInMs={this.state.speedInMs}
                     gameOn={this.state.gameOn}
+                    points={this.state.points}
+                    setTetrisState={this.setTetrisState.bind(this)}
                 />
 
                 <GameControl />
