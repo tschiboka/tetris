@@ -17,10 +17,23 @@
     background: transparent;
 }
 
-.type_S { background-color: aqua; }
-.type_I { background-color: deeppink; }
-.type_Z { background-color: rgb(255, 157, 0); }
-.type_L { background-color: yellow; }
-.type_O { background-color: mediumorchid; }
-.type_J { background-color: springgreen; }
-.type_T { background-color: azure; }
+.type_S, .type_DS { background-color: aqua; }
+.type_I, .type_DI { background-color: deeppink; }
+.type_Z, .type_DZ { background-color: rgb(255, 157, 0); }
+.type_L, .type_DL { background-color: yellow; }
+.type_O, .type_DO { background-color: mediumorchid; }
+.type_J, .type_DJ { background-color: springgreen; }
+.type_T, .type_DT { background-color: azure; }
+
+.type_DS, .type_DI, .type_DZ, .type_DL, .type_DO, .type_DJ, .type_DT  {
+    animation: destroyAnim 0.4s linear;
+}
+
+@keyframes destroyAnim {
+    to {
+        opacity: 0.2;
+        transform: scale(0.5) rotate(180deg);
+        border-radius: 30px;
+        background-color: red;
+    }
+}

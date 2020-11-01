@@ -5,6 +5,7 @@ import "./TetrisHeader.scss";
 
 export default class TetrisHeader extends Component {
     render() {
+        console.log("HEADER", this.props.nextShape);
         return (
             <div className="TetrisHeader">
                 <div className="TetrisHeader__time">

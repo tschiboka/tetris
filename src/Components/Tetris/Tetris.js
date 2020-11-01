@@ -13,18 +13,15 @@ export default class Tetris extends Component {
         this.state = {
             points: 0,
             gameOn: true,
-            speedInMs: 200,
+            speedInMs: 500,
             speed: 1,
             shapesLanded: 0,
         }
     }
 
 
-    setTetrisState(key, value) {
-        const newState = { ...this.state };
-        newState[key] = value;
-        this.setState(newState);
-    }
+
+    setTetrisState(newStateObj) { this.setState({ ...this.state, ...newStateObj }); }
 
 
 

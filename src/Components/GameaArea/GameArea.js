@@ -9,10 +9,34 @@ export default class GameArea extends Component {
 
         const ROW_NUM = 20;
         const COL_NUM = 14;
+        const pointRates = { drop: 0.5, hitBottom: 5, clearLine: [50, 120, 200, 300] };
+        const grid = [
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, "I", "I", "I", "I", "I", "I", "I", "I", "I", "I", "I", "I", "I"],
+            [0, "I", "I", "I", "I", "I", "I", "I", "I", "I", "I", "I", "I", "I"],
+            [0, "I", "I", "I", "I", "I", "I", "I", "I", "I", "I", "I", "I", "I"],
+            [0, "I", "I", "I", "I", "I", "I", "I", "I", "I", "I", "I", "I", "I"],
+        ]
 
         this.state = {
-            grid: Array(ROW_NUM).fill().map(row => Array(COL_NUM).fill(0)),
-            currentShape: this.getRandomShape(),
+            dimension: { row: ROW_NUM, column: COL_NUM },
+            grid: grid,//Array(ROW_NUM).fill().map(row => Array(COL_NUM).fill(0)),
+            currentShape: "I" || this.getRandomShape(),
             currentRow: 0,
             currentColumn: 8,
             currentDirection: 0,
@@ -23,7 +47,10 @@ export default class GameArea extends Component {
             allowKey: true,
             step: 0,
             time: 0,
+            runTimer: true,
             droppingShape: false,
+            pointRates: pointRates,
+            partialPoints: 0,
         }
     }
 
@@ -75,51 +102,67 @@ export default class GameArea extends Component {
         let time = 0;
 
         const timer = setInterval(() => {
-            time += 10;
+            if (this.state.runTimer) {
+                time += 5;
 
-            if (time % 1000 === 0) this.props.setTetrisState("time", time);
+                if (time % 1000 === 0) this.props.setTetrisState("time", time);
 
-            if (time % this.props.speedInMs === 0) this.dropOne();
+                if (time % this.props.speedInMs === 0) this.dropOne();
+
+                if (this.state.droppingShape) {
+                    this.dropOne();
+                    this.setState({ ...this.state, partialPoints: this.state.partialPoints + this.state.pointRates.drop });
+                }
+            }
 
             if (!this.props.gameOn) clearInterval(timer);
-
-            if (this.state.droppingShape) {
-                this.dropOne();
-                this.props.setTetrisState("points", this.props.points + 1);
-            }
-        }, 10);
+        }, 5);
     }
 
 
 
 
-    dropOne() {
+    async dropOne() {
         const { currentRow, currentColumn, currentShape, currentDirection } = { ...this.state };
         const isValidMove = this.isValidMove(currentRow + 1, currentColumn, currentShape, currentDirection);
 
         if (isValidMove) this.setState({ ...this.state, currentRow: this.state.currentRow + 1 });
         // REACHED BOTTOM
         else {
-            // SET POINTS AND SPEED
-            this.props.setTetrisState("nextShape", this.state.nextShape);
-            this.props.setTetrisState("points", this.props.points + 10);
-
             // UPDATE GRID
             const updatedGrid = [...this.state.grid.map(row => [...row])];
             const coords = this.getShapeCoordinates(currentRow, currentColumn, currentShape, currentDirection);
-
-
             coords.map(coord => updatedGrid[coord[0]][coord[1]] = this.state.currentShape);
+            this.setState({ ...this.state, grid: updatedGrid });
+
+            let partialPoints = this.state.partialPoints;
+            const nextShape = this.getRandomShape();
+
+            // CHECK IF THERE ARE ROWS TO DESTROY
+            const completeRows = updatedGrid.map((row, ri) => row.every(block => !!block) ? ri : false).filter(ind => ind !== false);
+
+            if (completeRows.length) {
+                await this.destroyRows(completeRows);
+                partialPoints += this.state.pointRates.clearLine[completeRows.length - 1];
+            }
+
             this.setState({
                 ...this.state,
-                grid: updatedGrid,
                 currentShape: this.state.nextShape,
                 currentRow: 0,
                 currentColumn: 8,
                 currentDirection: 0,
-                nextShape: this.getRandomShape(),
+                nextShape: nextShape,
                 droppingShape: false,
+                runTimer: true,
             }, () => {
+                // SET POINTS AND SPEED
+                this.props.setTetrisState(
+                    {
+                        "points": Math.floor(this.props.points + partialPoints + this.state.pointRates.hitBottom),
+                        "nextShape": this.state.nextShape
+                    });
+
                 // CHECK IF NEXT SHAPE HAS ENOUGH SPACE
                 const { currentRow, currentColumn, currentShape, currentDirection } = { ...this.state };
                 const isValidMove = this.isValidMove(currentRow + 1, currentColumn, currentShape, currentDirection);
@@ -128,7 +171,6 @@ export default class GameArea extends Component {
             });
         }
     }
-
 
 
 
@@ -218,12 +260,59 @@ export default class GameArea extends Component {
 
 
 
-    renderGrid() {
-        const { currentRow, currentColumn, currentShape, currentDirection } = { ...this.state };
-        const coords = this.getShapeCoordinates(currentRow, currentColumn, currentShape, currentDirection);
-        const grid = this.state.grid.map(row => [...row]);
+    async destroyRows(rowsToDestroy) {
+        this.setState({ ...this.state, runTimer: false });
 
-        coords.map(coord => grid[coord[0]][coord[1]] = this.state.currentShape);
+        const animTime = 400;
+        let rowsDestroyed = 0;
+
+        const setRowToAnimation = () => {
+            // set all bloks of rows class to destroy animation "D" plus its color
+            if (rowsDestroyed < rowsToDestroy.length) {
+                const updatedGrid = [...this.state.grid];
+                updatedGrid[rowsToDestroy[rowsDestroyed]] = updatedGrid[rowsToDestroy[rowsDestroyed]].map(bl => "D" + bl);
+                this.setState({ ...this.state, grid: updatedGrid, currentShape: undefined });
+            }
+
+            // clear previous line after its animation and drop all blocks above line with 1 row
+            if (rowsDestroyed - 1 >= 0) {
+                let dropTill = [rowsToDestroy[rowsDestroyed - 1]];
+                const droppedGrid = [...this.state.grid];
+                for (let i = dropTill; i >= 0; i--) {
+                    if (i === 0) Array(this.state.dimension.column).fill().map(bl => 0);
+                    else droppedGrid[i] = droppedGrid[i - 1];
+                }
+                this.setState({ ...this.state, grid: droppedGrid });
+            }
+            rowsDestroyed++;
+        }
+
+        const waitUntilDestroyed = async () => {
+            return await new Promise(resolve => {
+                const interval = setInterval(() => {
+                    setRowToAnimation();
+
+                    if (rowsDestroyed >= rowsToDestroy.length + 1) {
+                        resolve('');
+                        clearInterval(interval);
+                    };
+                }, animTime);
+            });
+        }
+
+        const go = await waitUntilDestroyed();
+    }
+
+
+
+    renderGrid() {
+        const grid = this.state.grid.map(row => [...row]);
+        if (this.state.currentShape) {
+            const { currentRow, currentColumn, currentShape, currentDirection } = { ...this.state };
+            const coords = this.getShapeCoordinates(currentRow, currentColumn, currentShape, currentDirection);
+            coords.map(coord => grid[coord[0]][coord[1]] = this.state.currentShape);
+        }
+
 
         return grid.map((row, ri) => (
             <div key={`row_${ri}`}>
